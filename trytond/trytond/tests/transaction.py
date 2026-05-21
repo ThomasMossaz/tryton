@@ -21,7 +21,10 @@ class SavepointLogging(ModelSQL):
 
     @classmethod
     def new(cls, value):
-        sp = Pool().get('test.savepoint')(value=value)
+        pool = Pool()
+        Savepoint = pool.get('test.savepoint.logging')
+
+        sp = Savepoint(value=value)
         sp.save()
         sp.log('write', f'{value}')
 

@@ -6,7 +6,7 @@ import os
 import time
 import unittest
 
-from trytond import backend
+from trytond import backend, config
 from trytond import cache as cache_mod
 from trytond.cache import (
     LRUDict, LRUDictTransaction, MemoryCache, freeze, unfreeze)
@@ -186,6 +186,7 @@ class MemoryCacheTestCase(unittest.TestCase):
         transaction = Transaction()
 
         with transaction.start(DB_NAME, USER):
+            self.wait_cache_listening()
             cache.set('foo', 'bar')
             with transaction.savepoint():
                 self.assertEqual(cache.get('foo'), None)
@@ -202,6 +203,7 @@ class MemoryCacheTestCase(unittest.TestCase):
         transaction = Transaction()
 
         with transaction.start(DB_NAME, USER):
+            self.wait_cache_listening()
             cache.set('foo', 'bar')
             with transaction.savepoint():
                 cache.clear()
@@ -213,6 +215,7 @@ class MemoryCacheTestCase(unittest.TestCase):
         transaction = Transaction()
 
         with transaction.start(DB_NAME, USER):
+            self.wait_cache_listening()
             cache.set('foo', 'bar')
             with transaction.savepoint() as sp:
                 cache.clear()
