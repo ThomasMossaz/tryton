@@ -169,12 +169,12 @@ class Module(ModelSQL, ModelView):
             return parents
 
         for module in modules:
-            deprecated, parent_deprecated = is_module_deprecated(module.name)
+            deprecated = is_module_deprecated(module.name)
             if deprecated:
                 raise UserError(
                     gettext(
                         'ir.msg_module_deprecated',
-                        module=parent_deprecated or module.name
+                        module=deprecated
                     )
                 )
             modules_activated.update((m for m in get_parents(module)

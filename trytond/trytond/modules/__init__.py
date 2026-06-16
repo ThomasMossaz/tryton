@@ -121,19 +121,17 @@ def is_module_to_install(module, update):
 
 
 def is_module_deprecated(module):
-    deprecated = False
-    parent_deprecated = None
+    deprecated = None
     info = get_module_info(module)
-    if info.get('deprecated', '').lower() == 'true':
-        deprecated = True
+    if info.get("deprecated", "").lower() == "true":
+        deprecated = module
     else:
-        parent_modules = info.get('depends', [])
+        parent_modules = info.get("depends", [])
         for module in parent_modules:
-            deprecated, parent_deprecated = is_module_deprecated(module)
+            deprecated = is_module_deprecated(module)
             if deprecated:
-                parent_deprecated = parent_deprecated or module
                 break
-    return deprecated, parent_deprecated
+    return deprecated
 
 
 def load_translations(pool, node, languages, prefix):
@@ -248,12 +246,12 @@ def load_module_graph(graph, pool, update=None, lang=None, indexes=None):
                     if package_state == 'activated':
                         package_state = 'to upgrade'
                     elif package_state != 'to remove':
-                        deprecated, parent_deprecated = is_module_deprecated(module)
+                        deprecated = is_module_deprecated(module)
                         if deprecated:
                             logger.warning(
                                 'Module "%s" is deprecated, neither this module nor the'
                                 ' modules that depend on it can be installed',
-                                parent_deprecated or module
+                                deprecated
                             )
                             continue
                         package_state = 'to activate'
