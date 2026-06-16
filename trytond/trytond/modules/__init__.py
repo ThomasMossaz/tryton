@@ -120,17 +120,21 @@ def is_module_to_install(module, update):
     return False
 
 
-def is_module_deprecated(module):
-    deprecated = None
+def get_parents(module):
     info = get_module_info(module)
-    if info.get("deprecated", "").lower() == "true":
-        deprecated = module
-    else:
-        parent_modules = info.get("depends", [])
-        for module in parent_modules:
-            deprecated = is_module_deprecated(module)
-            if deprecated:
-                break
+    parents = set(info.get("depends", []))
+    for module in info.get("depends", []):
+        parents.update(get_parents(module))
+    return parents
+
+
+def is_module_deprecated(modules):
+    deprecated = None
+    for module in modules:
+        info = get_module_info(module)
+        if info.get("deprecated", "").lower() == "true":
+            deprecated = module
+            break
     return deprecated
 
 
@@ -246,7 +250,9 @@ def load_module_graph(graph, pool, update=None, lang=None, indexes=None):
                     if package_state == 'activated':
                         package_state = 'to upgrade'
                     elif package_state != 'to remove':
-                        deprecated = is_module_deprecated(module)
+                        deprecated = is_module_deprecated(
+                            [module] + list(get_parents(module))
+                        )
                         if deprecated:
                             logger.warning(
                                 'Module "%s" is deprecated, neither this module nor the'

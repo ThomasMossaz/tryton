@@ -169,7 +169,8 @@ class Module(ModelSQL, ModelView):
             return parents
 
         for module in modules:
-            deprecated = is_module_deprecated(module.name)
+            parents = get_parents(module)
+            deprecated = is_module_deprecated([module.name] + [x.name for x in parents])
             if deprecated:
                 raise UserError(
                     gettext(
@@ -177,7 +178,7 @@ class Module(ModelSQL, ModelView):
                         module=deprecated
                     )
                 )
-            modules_activated.update((m for m in get_parents(module)
+            modules_activated.update((m for m in parents
                     if m.state == 'not activated'))
         cls.write(list(modules_activated), {
                 'state': 'to activate',
