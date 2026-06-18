@@ -129,13 +129,11 @@ def get_parents(module):
 
 
 def is_module_deprecated(modules):
-    deprecated = None
     for module in modules:
         info = get_module_info(module)
         if info.get("deprecated", "").lower() == "true":
-            deprecated = module
-            break
-    return deprecated
+            return module
+    return None
 
 
 def load_translations(pool, node, languages, prefix):
